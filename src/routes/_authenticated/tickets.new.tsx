@@ -23,7 +23,7 @@ function NewTicket() {
   const [websiteId, setWebsiteId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [type, setType] = useState<"issue" | "improvement">("issue");
+  const [type, setType] = useState<"issue" | "improvement" | "enhancement">("issue");
   const [priority, setPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
   const [busy, setBusy] = useState(false);
 
@@ -79,8 +79,9 @@ function NewTicket() {
                 <Select value={type} onValueChange={(v) => setType(v as any)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="issue">Issue</SelectItem>
-                    <SelectItem value="improvement">Improvement</SelectItem>
+                    <SelectItem value="issue">Issue / Bug</SelectItem>
+                    <SelectItem value="enhancement">Enhancement / New Feature</SelectItem>
+                    <SelectItem value="improvement">Improvement / Design Changes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

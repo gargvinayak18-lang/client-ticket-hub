@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { 
-  adminCreateClient, 
-  adminListClients,
-  adminDeleteUser,
-  adminUpdateUserPassword
+  adminCreateAdmin, 
+  adminListAdmins, 
+  adminDeleteUser, 
+  adminUpdateUserPassword 
 } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,22 +33,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, MoreVertical, KeyRound, UserMinus, User } from "lucide-react";
+import { ShieldPlus, UserRound, MoreVertical, KeyRound, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/admin/clients")({
-  component: ClientsPage,
+export const Route = createFileRoute("/_authenticated/admin/admins")({
+  component: AdminsPage,
 });
 
-function ClientsPage() {
-  const { role, loading } = useAuth();
+function AdminsPage() {
+  const { role, loading, user } = useAuth();
   
-  const list = useServerFn(adminListClients);
-  const create = useServerFn(adminCreateClient);
+  const list = useServerFn(adminListAdmins);
+  const create = useServerFn(adminCreateAdmin);
   const deleteUser = useServerFn(adminDeleteUser);
   const updatePassword = useServerFn(adminUpdateUserPassword);
   
-  const [clients, setClients] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
   const [busy, setBusy] = useState(false);
@@ -66,8 +66,8 @@ function ClientsPage() {
 
   const load = async () => {
     try {
-      const c = await list();
-      setClients(c);
+      const a = await list();
+      setAdmins(a);
     } catch (e: any) {
       toast.error(e.message);
     }
@@ -85,7 +85,7 @@ function ClientsPage() {
     setBusy(true);
     try {
       await create({ data: form });
-      toast.success("Client account created");
+      toast.success("Admin user created successfully");
       setForm({ email: "", password: "", full_name: "" });
       setOpen(false);
       load();
@@ -102,7 +102,7 @@ function ClientsPage() {
     setUpdatingPwd(true);
     try {
       await updatePassword({ data: { userId: targetUser.id, password: newPassword } });
-      toast.success(`Password updated for client ${targetUser.full_name}`);
+      toast.success(`Password updated for ${targetUser.full_name}`);
       setNewPassword("");
       setTargetUser(null);
       setPasswordOpen(false);
@@ -118,7 +118,7 @@ function ClientsPage() {
     setIsDeleting(true);
     try {
       await deleteUser({ data: { userId: deletingUser.id } });
-      toast.success(`Client account deleted for ${deletingUser.full_name}`);
+      toast.success(`Account deleted for ${deletingUser.full_name}`);
       setDeletingUser(null);
       setDeleteOpen(false);
       load();
@@ -133,42 +133,46 @@ function ClientsPage() {
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Clients</h1>
-          <p className="text-muted-foreground mt-1">Create and manage client accounts</p>
+          <h1 className="text-3xl font-semibold tracking-tight flex items-center gap-2">
+            Administrators
+          </h1>
+          <p className="text-muted-foreground mt-1">Manage team members with administrative access</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" /> Add Client
+            <Button className="bg-primary hover:bg-primary/90 flex items-center gap-2">
+              <ShieldPlus className="h-4 w-4" /> Add Admin
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>New Client Account</DialogTitle></DialogHeader>
+            <DialogHeader>
+              <DialogTitle>New Administrator Account</DialogTitle>
+            </DialogHeader>
             <form onSubmit={submit} className="space-y-4">
               <div className="space-y-2">
                 <Label>Full name</Label>
                 <Input 
-                  placeholder="e.g. Jane Smith"
+                  placeholder="e.g. John Doe"
                   required 
                   value={form.full_name} 
                   onChange={(e) => setForm({ ...form, full_name: e.target.value })} 
                 />
               </div>
               <div className="space-y-2">
-                <Label>Email</Label>
+                <Label>Email Address</Label>
                 <Input 
                   type="email" 
-                  placeholder="client@email.com"
+                  placeholder="email@company.com"
                   required 
                   value={form.email} 
                   onChange={(e) => setForm({ ...form, email: e.target.value })} 
                 />
               </div>
               <div className="space-y-2">
-                <Label>Temporary password (min 8 chars)</Label>
+                <Label>Temporary Password (min 8 chars)</Label>
                 <Input 
                   type="text" 
-                  placeholder="Enter secure temporary password"
+                  placeholder="Create a secure password"
                   required 
                   minLength={8} 
                   value={form.password} 
@@ -176,23 +180,25 @@ function ClientsPage() {
                 />
               </div>
               <DialogFooter>
-                <Button type="submit" disabled={busy}>{busy ? "Creating…" : "Create Client"}</Button>
+                <Button type="submit" disabled={busy} className="w-full sm:w-auto">
+                  {busy ? "Creating…" : "Provision Admin"}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Reset Client Password Dialog */}
+      {/* Manage Password Dialog */}
       <Dialog open={passwordOpen} onOpenChange={(v) => { if(!v) { setTargetUser(null); setNewPassword(""); } setPasswordOpen(v); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reset Client Password</DialogTitle>
+            <DialogTitle>Reset Password</DialogTitle>
           </DialogHeader>
           {targetUser && (
             <form onSubmit={handlePasswordUpdate} className="space-y-4 pt-2">
               <div className="text-sm text-muted-foreground">
-                Set a new password for <strong className="text-foreground">{targetUser.full_name}</strong>.
+                Set a new password for <strong className="text-foreground">{targetUser.full_name}</strong> ({targetUser.email}).
               </div>
               <div className="space-y-2">
                 <Label>New Password (min 8 chars)</Label>
@@ -201,14 +207,14 @@ function ClientsPage() {
                   minLength={8}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new secure password"
+                  placeholder="Enter new strong password"
                   autoFocus
                 />
               </div>
               <DialogFooter>
                 <Button type="button" variant="ghost" onClick={() => setPasswordOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={updatingPwd}>
-                  {updatingPwd ? "Updating…" : "Save Password"}
+                  {updatingPwd ? "Saving…" : "Update Password"}
                 </Button>
               </DialogFooter>
             </form>
@@ -216,14 +222,14 @@ function ClientsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm Delete Client Account Alert */}
+      {/* Delete Account Confirmation Alert */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete client account?</AlertDialogTitle>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove client <strong className="text-foreground">{deletingUser?.full_name}</strong>. 
-              All associated websites and support tickets for this client will also be permanently deleted. This action cannot be undone.
+              This action cannot be undone. This will permanently delete the administrative account for{" "}
+              <strong className="text-foreground">{deletingUser?.full_name}</strong> ({deletingUser?.email}) and remove all their platform access.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -233,71 +239,86 @@ function ClientsPage() {
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Yes, delete client"}
+              {isDeleting ? "Deleting..." : "Yes, delete account"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {clients.length === 0 ? (
-        <Card className="p-12 text-center text-muted-foreground">No clients found.</Card>
+      {admins.length === 0 ? (
+        <Card className="p-12 text-center text-muted-foreground">Loading administrators...</Card>
       ) : (
-        <Card className="divide-y border overflow-hidden shadow-sm">
-          {clients.map((c) => (
-            <div key={c.id} className="p-5 flex items-center justify-between hover:bg-muted/10 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center border flex-shrink-0">
-                  <User className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="font-medium">{c.full_name}</div>
-                  <div className="text-sm text-muted-foreground">{c.email}</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <div className="text-right hidden sm:block">
-                  <div className="text-xs text-muted-foreground">
-                    Joined {new Date(c.created_at).toLocaleDateString()}
+        <Card className="divide-y overflow-hidden border shadow-sm bg-card">
+          {admins.map((admin) => {
+            const isMe = admin.email === user?.email;
+            return (
+              <div key={admin.id} className="p-5 flex items-center justify-between hover:bg-muted/10 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent flex items-center justify-center border flex-shrink-0">
+                    <UserRound className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="font-medium flex items-center gap-2 flex-wrap">
+                      {admin.full_name}
+                      {isMe && (
+                        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full font-semibold border border-primary/20">
+                          You
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">{admin.email}</div>
                   </div>
                 </div>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border">
-                      <MoreVertical className="h-4 w-4" />
-                      <span className="sr-only">Actions</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Client Options</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="cursor-pointer flex items-center gap-2"
-                      onClick={() => {
-                        setTargetUser(c);
-                        setPasswordOpen(true);
-                      }}
-                    >
-                      <KeyRound className="h-4 w-4 text-muted-foreground" />
-                      Change Password
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 flex items-center gap-2"
-                      onClick={() => {
-                        setDeletingUser(c);
-                        setDeleteOpen(true);
-                      }}
-                    >
-                      <UserMinus className="h-4 w-4" />
-                      Remove Client
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                
+                <div className="flex items-center gap-4">
+                  <div className="text-right hidden sm:block">
+                    <div className="text-xs font-medium text-primary/80 bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-md inline-block mb-1">
+                      Administrator
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Joined {new Date(admin.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  
+                  {!isMe && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border">
+                          <MoreVertical className="h-4 w-4" />
+                          <span className="sr-only">Open actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="cursor-pointer flex items-center gap-2"
+                          onClick={() => {
+                            setTargetUser(admin);
+                            setPasswordOpen(true);
+                          }}
+                        >
+                          <KeyRound className="h-4 w-4 text-muted-foreground" />
+                          Change Password
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10 flex items-center gap-2"
+                          onClick={() => {
+                            setDeletingUser(admin);
+                            setDeleteOpen(true);
+                          }}
+                        >
+                          <UserMinus className="h-4 w-4" />
+                          Remove Admin
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </Card>
       )}
     </div>

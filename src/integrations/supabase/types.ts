@@ -47,6 +47,12 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at: string
           website_id: string
+          flow_id: string | null
+          current_step: number | null
+          assigned_to_user: string | null
+          reviewer_id: string | null
+          workflow_step_status: "working" | "submitted" | null
+          last_submission_notes: string | null
         }
         Insert: {
           client_id: string
@@ -59,6 +65,12 @@ export type Database = {
           type: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           website_id: string
+          flow_id?: string | null
+          current_step?: number | null
+          assigned_to_user?: string | null
+          reviewer_id?: string | null
+          workflow_step_status?: "working" | "submitted" | null
+          last_submission_notes?: string | null
         }
         Update: {
           client_id?: string
@@ -71,6 +83,12 @@ export type Database = {
           type?: Database["public"]["Enums"]["ticket_type"]
           updated_at?: string
           website_id?: string
+          flow_id?: string | null
+          current_step?: number | null
+          assigned_to_user?: string | null
+          reviewer_id?: string | null
+          workflow_step_status?: "working" | "submitted" | null
+          last_submission_notes?: string | null
         }
         Relationships: [
           {
@@ -124,6 +142,129 @@ export type Database = {
         }
         Relationships: []
       }
+      approval_flows: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          target_type: "staff" | "client"
+          updated_at: string
+          assigned_role: "jr_dev" | "sr_dev"
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          target_type: "staff" | "client"
+          updated_at?: string
+          assigned_role?: "jr_dev" | "sr_dev"
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          target_type?: "staff" | "client"
+          updated_at?: string
+          assigned_role?: "jr_dev" | "sr_dev"
+        }
+        Relationships: []
+      }
+      approval_steps: {
+        Row: {
+          approver_role: string
+          created_at: string
+          flow_id: string
+          id: string
+          name: string
+          step_number: number
+        }
+        Insert: {
+          approver_role: string
+          created_at?: string
+          flow_id: string
+          id?: string
+          name: string
+          step_number: number
+        }
+        Update: {
+          approver_role?: string
+          created_at?: string
+          flow_id?: string
+          id?: string
+          name?: string
+          step_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_steps_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "approval_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          ticket_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          ticket_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          ticket_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_comments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_step_reviewers: {
+        Row: {
+          ticket_id: string
+          step_number: number
+          reviewer_id: string
+        }
+        Insert: {
+          ticket_id: string
+          step_number: number
+          reviewer_id: string
+        }
+        Update: {
+          ticket_id?: string
+          step_number?: number
+          reviewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_step_reviewers_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -138,10 +279,10 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "client"
+      app_role: "admin" | "client" | "jr_dev" | "sr_dev" | "pm"
       ticket_priority: "low" | "medium" | "high" | "urgent"
       ticket_status: "open" | "in_progress" | "resolved" | "closed"
-      ticket_type: "issue" | "improvement"
+      ticket_type: "issue" | "improvement" | "enhancement"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -269,10 +410,10 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "client"],
+      app_role: ["admin", "client", "jr_dev", "sr_dev", "pm"],
       ticket_priority: ["low", "medium", "high", "urgent"],
       ticket_status: ["open", "in_progress", "resolved", "closed"],
-      ticket_type: ["issue", "improvement"],
+      ticket_type: ["issue", "improvement", "enhancement"],
     },
   },
 } as const
