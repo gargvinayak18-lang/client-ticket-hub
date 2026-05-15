@@ -249,7 +249,7 @@ function TicketDetail() {
       setAllFlows(flows ?? []);
 
       // 1. Fetch user roles including key labels
-      const { data: revRoles } = await supabase.from("user_roles").select("user_id, role").in("role", ["admin", "pm", "sr_dev", "client"]);
+      const { data: revRoles } = await supabase.from("user_roles").select("user_id, role").in("role", ["admin", "pm", "sr_dev", "jr_dev", "tester", "client"]);
       
       if (revRoles && revRoles.length > 0) {
         const roleMap = revRoles.reduce((acc, r) => {
