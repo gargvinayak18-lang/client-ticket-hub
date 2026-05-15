@@ -1,13 +1,12 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { 
-  adminCreateAdmin, 
-  adminListAdmins, 
-  adminDeleteUser, 
-  adminUpdateUserPassword 
-} from "@/lib/admin.functions";
+  apiCreateAdmin, 
+  apiListAdmins, 
+  apiDeleteUser, 
+  apiUpdatePassword 
+} from "@/lib/admin.api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,11 +42,6 @@ export const Route = createFileRoute("/_authenticated/admin/admins")({
 function AdminsPage() {
   const { role, loading, user } = useAuth();
   
-  const list = useServerFn(adminListAdmins);
-  const create = useServerFn(adminCreateAdmin);
-  const deleteUser = useServerFn(adminDeleteUser);
-  const updatePassword = useServerFn(adminUpdateUserPassword);
-  
   const [admins, setAdmins] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
@@ -66,7 +60,7 @@ function AdminsPage() {
 
   const load = async () => {
     try {
-      const a = await list();
+      const a = await apiListAdmins();
       setAdmins(a);
     } catch (e: any) {
       toast.error(e.message);
@@ -84,7 +78,7 @@ function AdminsPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await create({ data: form });
+      await apiCreateAdmin(form);
       toast.success("Admin user created successfully");
       setForm({ email: "", password: "", full_name: "" });
       setOpen(false);
@@ -101,7 +95,7 @@ function AdminsPage() {
     if (!targetUser || newPassword.length < 8) return;
     setUpdatingPwd(true);
     try {
-      await updatePassword({ data: { userId: targetUser.id, password: newPassword } });
+      await apiUpdatePassword(targetUser.id, newPassword);
       toast.success(`Password updated for ${targetUser.full_name}`);
       setNewPassword("");
       setTargetUser(null);
@@ -117,7 +111,7 @@ function AdminsPage() {
     if (!deletingUser) return;
     setIsDeleting(true);
     try {
-      await deleteUser({ data: { userId: deletingUser.id } });
+      await apiDeleteUser(deletingUser.id);
       toast.success(`Account deleted for ${deletingUser.full_name}`);
       setDeletingUser(null);
       setDeleteOpen(false);

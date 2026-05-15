@@ -1,8 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
-import { adminAddWebsite, adminListClients, adminListWebsitesForClient } from "@/lib/admin.functions";
+import { apiAddWebsite, apiListClients, apiListWebsites } from "@/lib/admin.api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,9 +21,6 @@ export const Route = createFileRoute("/_authenticated/admin/websites")({
 
 function WebsitesPage() {
   const { role, loading } = useAuth();
-  const list = useServerFn(adminListClients);
-  const listWs = useServerFn(adminListWebsitesForClient);
-  const add = useServerFn(adminAddWebsite);
   const [clients, setClients] = useState<any[]>([]);
   const [selected, setSelected] = useState("");
   const [websites, setWebsites] = useState<any[]>([]);
@@ -33,11 +29,19 @@ function WebsitesPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (role === "admin") list().then(setClients).catch((e) => toast.error(e.message));
+    if (role === "admin") {
+      apiListClients()
+        .then(setClients)
+        .catch((e) => toast.error(e.message));
+    }
   }, [role]);
 
   useEffect(() => {
-    if (selected) listWs({ data: { client_id: selected } }).then(setWebsites);
+    if (selected) {
+      apiListWebsites(selected)
+        .then(setWebsites)
+        .catch((e) => toast.error(e.message));
+    }
   }, [selected]);
 
   if (loading) return null;
@@ -47,11 +51,11 @@ function WebsitesPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await add({ data: { client_id: selected, ...form } });
+      await apiAddWebsite({ client_id: selected, ...form });
       toast.success("Website added");
       setForm({ name: "", url: "" });
       setOpen(false);
-      const ws = await listWs({ data: { client_id: selected } });
+      const ws = await apiListWebsites(selected);
       setWebsites(ws);
     } catch (e: any) {
       toast.error(e.message);

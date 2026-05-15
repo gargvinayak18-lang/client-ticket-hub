@@ -1,13 +1,12 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { 
-  adminCreateClient, 
-  adminListClients,
-  adminDeleteUser,
-  adminUpdateUserPassword
-} from "@/lib/admin.functions";
+  apiCreateClient, 
+  apiListClients,
+  apiDeleteUser,
+  apiUpdatePassword
+} from "@/lib/admin.api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,11 +42,6 @@ export const Route = createFileRoute("/_authenticated/admin/clients")({
 function ClientsPage() {
   const { role, loading } = useAuth();
   
-  const list = useServerFn(adminListClients);
-  const create = useServerFn(adminCreateClient);
-  const deleteUser = useServerFn(adminDeleteUser);
-  const updatePassword = useServerFn(adminUpdateUserPassword);
-  
   const [clients, setClients] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
@@ -66,7 +60,7 @@ function ClientsPage() {
 
   const load = async () => {
     try {
-      const c = await list();
+      const c = await apiListClients();
       setClients(c);
     } catch (e: any) {
       toast.error(e.message);
@@ -84,7 +78,7 @@ function ClientsPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await create({ data: form });
+      await apiCreateClient(form);
       toast.success("Client account created");
       setForm({ email: "", password: "", full_name: "" });
       setOpen(false);
@@ -101,7 +95,7 @@ function ClientsPage() {
     if (!targetUser || newPassword.length < 8) return;
     setUpdatingPwd(true);
     try {
-      await updatePassword({ data: { userId: targetUser.id, password: newPassword } });
+      await apiUpdatePassword(targetUser.id, newPassword);
       toast.success(`Password updated for client ${targetUser.full_name}`);
       setNewPassword("");
       setTargetUser(null);
@@ -117,7 +111,7 @@ function ClientsPage() {
     if (!deletingUser) return;
     setIsDeleting(true);
     try {
-      await deleteUser({ data: { userId: deletingUser.id } });
+      await apiDeleteUser(deletingUser.id);
       toast.success(`Client account deleted for ${deletingUser.full_name}`);
       setDeletingUser(null);
       setDeleteOpen(false);

@@ -1,14 +1,13 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/use-auth";
 import { 
-  adminCreateStaff, 
-  adminListStaff, 
-  adminDeleteUser, 
-  adminUpdateUserPassword,
-  adminUpdateUserRole 
-} from "@/lib/admin.functions";
+  apiCreateStaff, 
+  apiListStaff, 
+  apiDeleteUser, 
+  apiUpdatePassword,
+  apiUpdateRole 
+} from "@/lib/admin.api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,12 +49,6 @@ type StaffRole = "jr_dev" | "sr_dev" | "pm" | "tester";
 function StaffManagementPage() {
   const { role, loading } = useAuth();
   
-  const list = useServerFn(adminListStaff);
-  const create = useServerFn(adminCreateStaff);
-  const deleteUser = useServerFn(adminDeleteUser);
-  const updatePassword = useServerFn(adminUpdateUserPassword);
-  const updateRole = useServerFn(adminUpdateUserRole);
-  
   const [staff, setStaff] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ email: "", password: "", full_name: "", role: "jr_dev" as StaffRole });
@@ -80,7 +73,7 @@ function StaffManagementPage() {
 
   const load = async () => {
     try {
-      const s = await list();
+      const s = await apiListStaff();
       setStaff(s);
     } catch (e: any) {
       toast.error(e.message);
@@ -98,7 +91,7 @@ function StaffManagementPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      await create({ data: form });
+      await apiCreateStaff(form);
       toast.success("Staff account provisioned successfully");
       setForm({ email: "", password: "", full_name: "", role: "jr_dev" });
       setOpen(false);
@@ -115,7 +108,7 @@ function StaffManagementPage() {
     if (!targetUser || newPassword.length < 8) return;
     setUpdatingPwd(true);
     try {
-      await updatePassword({ data: { userId: targetUser.id, password: newPassword } });
+      await apiUpdatePassword(targetUser.id, newPassword);
       toast.success(`Password updated for ${targetUser.full_name}`);
       setNewPassword("");
       setTargetUser(null);
@@ -131,7 +124,7 @@ function StaffManagementPage() {
     if (!deletingUser) return;
     setIsDeleting(true);
     try {
-      await deleteUser({ data: { userId: deletingUser.id } });
+      await apiDeleteUser(deletingUser.id);
       toast.success(`Account removed for ${deletingUser.full_name}`);
       setDeletingUser(null);
       setDeleteOpen(false);
@@ -148,7 +141,7 @@ function StaffManagementPage() {
     if (!roleTarget || !selectedRole) return;
     setUpdatingRole(true);
     try {
-      await updateRole({ data: { userId: roleTarget.id, role: selectedRole as any } });
+      await apiUpdateRole(roleTarget.id, selectedRole);
       toast.success(`Role updated to ${selectedRole} for ${roleTarget.full_name}`);
       setRoleTarget(null);
       setSelectedRole("");
