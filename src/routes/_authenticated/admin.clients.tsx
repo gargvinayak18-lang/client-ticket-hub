@@ -125,14 +125,14 @@ function ClientsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Clients</h1>
-          <p className="text-muted-foreground mt-1">Create and manage client accounts</p>
+          <p className="text-muted-foreground mt-1 text-sm">Create and manage client accounts</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 w-full sm:w-auto justify-center shrink-0">
               <Plus className="h-4 w-4" /> Add Client
             </Button>
           </DialogTrigger>
@@ -246,6 +246,9 @@ function ClientsPage() {
                 <div>
                   <div className="font-medium">{c.full_name}</div>
                   <div className="text-sm text-muted-foreground">{c.email}</div>
+                  <div className="sm:hidden mt-1.5 text-[10px] font-medium text-emerald-800 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md inline-block">
+                    Client
+                  </div>
                 </div>
               </div>
               

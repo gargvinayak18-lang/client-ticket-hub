@@ -125,16 +125,16 @@ function AdminsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight flex items-center gap-2">
             Administrators
           </h1>
-          <p className="text-muted-foreground mt-1">Manage team members with administrative access</p>
+          <p className="text-muted-foreground mt-1 text-sm">Manage team members with administrative access</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 flex items-center gap-2">
+            <Button className="bg-primary hover:bg-primary/90 flex items-center gap-2 w-full sm:w-auto justify-center shrink-0">
               <ShieldPlus className="h-4 w-4" /> Add Admin
             </Button>
           </DialogTrigger>
@@ -261,6 +261,9 @@ function AdminsPage() {
                       )}
                     </div>
                     <div className="text-sm text-muted-foreground">{admin.email}</div>
+                    <div className="sm:hidden mt-1.5 text-[10px] font-medium text-primary/80 bg-primary/5 border border-primary/10 px-2 py-0.5 rounded-md inline-block">
+                      Administrator
+                    </div>
                   </div>
                 </div>
                 

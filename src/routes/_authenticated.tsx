@@ -12,9 +12,12 @@ import {
 import { 
   Popover, PopoverContent, PopoverTrigger 
 } from "@/components/ui/popover";
+import {
+  Sheet, SheetTrigger, SheetContent
+} from "@/components/ui/sheet";
 import { 
   TicketIcon, LayoutDashboard, Users, LogOut, Globe, Shield, KeyRound, UserCog, GitPullRequest,
-  Bell, ShieldCheck, ChevronRight, Inbox, Clock
+  Bell, ShieldCheck, ChevronRight, Inbox, Clock, Menu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -228,103 +231,127 @@ function AuthLayout() {
     }
   };
 
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const renderSidebarContent = (onNavClick?: () => void) => (
+    <div className="flex flex-col h-full bg-primary text-primary-foreground">
+      <div className="px-6 py-5 border-b border-white/10 flex flex-col gap-3 bg-black/10">
+        <div className="bg-white p-2 rounded-xl shadow-inner w-fit flex items-center justify-center max-h-12">
+          <img src="/logo.png" alt="Nexora Solutions" className="h-6 object-contain" />
+        </div>
+        <div className="px-1">
+          <div className="text-[10px] text-white/70 font-bold tracking-wider uppercase leading-none">{getRoleLabel(role)} Workspace</div>
+        </div>
+      </div>
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        {nav.map((n) => {
+          const active = location.pathname.startsWith(n.to);
+          return (
+            <Link
+              key={n.to}
+              to={n.to}
+              onClick={onNavClick}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
+                active ? "bg-white/15 text-white shadow-sm" : "text-white/65 hover:bg-white/10 hover:text-white",
+              )}
+            >
+              <n.icon className="h-4 w-4" />
+              {n.label}
+            </Link>
+          );
+        })}
+      </nav>
+      
+      <div className="p-3 border-t border-white/10 space-y-1">
+        <div className="text-[11px] opacity-60 px-3 pb-2 truncate font-medium">{user?.email}</div>
+        
+        <Dialog open={pwdOpen} onOpenChange={(v) => { if(!v) setNewPassword(""); setPwdOpen(v); }}>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10 font-medium text-xs"
+            >
+              <KeyRound className="h-3.5 w-3.5 mr-2 opacity-80" />
+              Change Password
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Change Your Password</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdatePassword} className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label>New Secure Password (min 8 chars)</Label>
+                <Input
+                  type="password"
+                  required
+                  minLength={8}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  autoFocus
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setPwdOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={busy}>
+                  {busy ? "Saving..." : "Save Password"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10 font-medium text-xs"
+          onClick={async () => {
+            await signOut();
+            if (onNavClick) onNavClick();
+            navigate({ to: "/login" });
+          }}
+        >
+          <LogOut className="h-3.5 w-3.5 mr-2 opacity-80" />
+          Sign out
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-secondary/30 flex">
-      {/* Sidebar Navigation */}
-      <aside className="w-60 bg-primary text-primary-foreground flex flex-col fixed inset-y-0 left-0 z-20 shadow-xl">
-        <div className="px-6 py-5 border-b border-white/10 flex flex-col gap-3 bg-black/10">
-          <div className="bg-white p-2 rounded-xl shadow-inner w-fit flex items-center justify-center max-h-12">
-            <img src="/logo.png" alt="Nexora Solutions" className="h-6 object-contain" />
-          </div>
-          <div className="px-1">
-            <div className="text-[10px] text-white/70 font-bold tracking-wider uppercase leading-none">{getRoleLabel(role)} Workspace</div>
-          </div>
-        </div>
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-          {nav.map((n) => {
-            const active = location.pathname.startsWith(n.to);
-            return (
-              <Link
-                key={n.to}
-                to={n.to}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
-                  active ? "bg-white/15 text-white shadow-sm" : "text-white/65 hover:bg-white/10 hover:text-white",
-                )}
-              >
-                <n.icon className="h-4 w-4" />
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
-        
-        <div className="p-3 border-t border-white/10 space-y-1">
-          <div className="text-[11px] opacity-60 px-3 pb-2 truncate font-medium">{user?.email}</div>
-          
-          <Dialog open={pwdOpen} onOpenChange={(v) => { if(!v) setNewPassword(""); setPwdOpen(v); }}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10 font-medium text-xs"
-              >
-                <KeyRound className="h-3.5 w-3.5 mr-2 opacity-80" />
-                Change Password
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Change Your Password</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleUpdatePassword} className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label>New Secure Password (min 8 chars)</Label>
-                  <Input
-                    type="password"
-                    required
-                    minLength={8}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    autoFocus
-                  />
-                </div>
-                <DialogFooter>
-                  <Button type="button" variant="ghost" onClick={() => setPwdOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={busy}>
-                    {busy ? "Saving..." : "Save Password"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10 font-medium text-xs"
-            onClick={async () => {
-              await signOut();
-              navigate({ to: "/login" });
-            }}
-          >
-            <LogOut className="h-3.5 w-3.5 mr-2 opacity-80" />
-            Sign out
-          </Button>
-        </div>
+      {/* Sidebar Navigation - Desktop Only */}
+      <aside className="w-60 bg-primary text-primary-foreground flex flex-col fixed inset-y-0 left-0 z-20 shadow-xl hidden md:flex">
+        {renderSidebarContent()}
       </aside>
 
       {/* Main Body Wrap with Sticky Dynamic Header */}
-      <div className="ml-60 flex-1 flex flex-col min-h-screen w-full">
+      <div className="flex-1 md:ml-60 flex flex-col min-h-screen w-full">
         
         {/* TOP APP HEADER BAR */}
-        <header className="h-14 bg-background border-b px-8 flex items-center justify-between sticky top-0 z-10 shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm">
-          <div>
+        <header className="h-14 bg-background border-b px-4 sm:px-8 flex items-center justify-between sticky top-0 z-10 shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            {/* Mobile Menu Trigger */}
+            <div className="md:hidden">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" className="h-9 w-9">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-60 bg-primary text-primary-foreground border-r-0">
+                  {renderSidebarContent(() => setMobileMenuOpen(false))}
+                </SheetContent>
+              </Sheet>
+            </div>
             <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Operational Console</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             {/* APPROVALS INBOX POPOVER */}
             <Popover>
               <PopoverTrigger asChild>
@@ -337,7 +364,7 @@ function AuthLayout() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[360px] p-0 shadow-2xl rounded-xl" align="end">
+              <PopoverContent className="w-[320px] sm:w-[360px] p-0 shadow-2xl rounded-xl" align="end">
                 <div className="p-4 border-b bg-muted/20 flex items-center justify-between">
                   <h4 className="font-bold text-sm flex items-center gap-1.5">
                     <ShieldCheck className="h-4 w-4 text-primary" /> Pending Requests
@@ -358,7 +385,7 @@ function AuthLayout() {
                     pendingApprovals.map((t) => (
                       <div key={t.id} className="p-3 rounded-lg border hover:bg-accent/30 transition-all space-y-2.5">
                         <div className="space-y-0.5">
-                          <div className="font-bold text-xs truncate max-w-[280px]">{t.title}</div>
+                          <div className="font-bold text-xs truncate max-w-[260px] sm:max-w-[280px]">{t.title}</div>
                           <div className="text-[9px] flex items-center gap-1 text-muted-foreground font-medium">
                             <Clock className="h-3 w-3" />
                             Submitted {new Date(t.updated_at).toLocaleDateString()}
@@ -402,14 +429,14 @@ function AuthLayout() {
             </Popover>
 
             {/* Right Corner User Meta */}
-            <div className="h-8 px-3 border bg-muted/40 text-xs font-semibold rounded-full text-foreground flex items-center shadow-sm border-border">
-              {user?.email?.split("@")[0]}
+            <div className="h-8 px-3 border bg-muted/40 text-xs font-semibold rounded-full text-foreground flex items-center shadow-sm border-border max-w-[100px] sm:max-w-none truncate">
+              <span className="truncate">{user?.email?.split("@")[0]}</span>
             </div>
           </div>
         </header>
 
         {/* Layout Content Body */}
-        <main className="p-8 flex-1">
+        <main className="p-4 sm:p-8 flex-1 overflow-x-hidden">
           <Outlet />
         </main>
       </div>

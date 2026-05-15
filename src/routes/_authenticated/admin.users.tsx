@@ -187,16 +187,16 @@ function StaffManagementPage() {
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight flex items-center gap-2">
             Staff & Developers
           </h1>
-          <p className="text-muted-foreground mt-1">Manage developers and product managers who view and review client tickets</p>
+          <p className="text-muted-foreground mt-1 text-sm">Manage developers and product managers who view and review client tickets</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 flex items-center gap-2">
+            <Button className="bg-primary hover:bg-primary/90 flex items-center gap-2 w-full sm:w-auto justify-center shrink-0">
               <UserPlus className="h-4 w-4" /> Provision Staff
             </Button>
           </DialogTrigger>
@@ -378,6 +378,7 @@ function StaffManagementPage() {
                       {member.full_name}
                     </div>
                     <div className="text-sm text-muted-foreground">{member.email}</div>
+                    <div className="sm:hidden mt-1.5">{getRoleBadge(member.role)}</div>
                   </div>
                 </div>
                 

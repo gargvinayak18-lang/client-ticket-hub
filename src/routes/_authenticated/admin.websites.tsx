@@ -71,12 +71,12 @@ function WebsitesPage() {
         <p className="text-muted-foreground mt-1">Assign websites to clients</p>
       </div>
 
-      <Card className="p-6 space-y-4">
-        <div className="flex items-end gap-3">
-          <div className="flex-1 space-y-2">
+      <Card className="p-4 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+          <div className="flex-1 w-full space-y-2">
             <Label>Client</Label>
             <Select value={selected} onValueChange={setSelected}>
-              <SelectTrigger><SelectValue placeholder="Choose a client" /></SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Choose a client" /></SelectTrigger>
               <SelectContent>
                 {clients.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.full_name} ({c.email})</SelectItem>
@@ -86,7 +86,7 @@ function WebsitesPage() {
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button disabled={!selected}><Plus className="h-4 w-4 mr-2" /> Add Website</Button>
+              <Button disabled={!selected} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" /> Add Website</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Add Website</DialogTitle></DialogHeader>

@@ -128,16 +128,16 @@ function Dashboard() {
   const filteredTickets = filter === "total" ? searchedTickets : searchedTickets.filter((t) => t.status === filter);
 
   return (
-    <div className="space-y-6 max-w-7xl h-[calc(100vh-6rem)] flex flex-col">
-      <div className="flex items-start justify-between flex-shrink-0">
+    <div className="space-y-6 max-w-7xl h-auto md:h-[calc(100vh-6rem)] flex flex-col">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 flex-shrink-0">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Workboard</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm">
             {isStaff ? "Track and review active client tickets" : `Viewing tickets for ${user?.email}`}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 flex-shrink-0">
-          <div className="relative w-48 sm:w-64">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search tasks & websites..."
@@ -200,14 +200,14 @@ function Dashboard() {
       </div>
 
       {/* Kanban View */}
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+      <div className="flex-1 md:overflow-hidden flex flex-col min-h-0">
         {loading && tickets.length === 0 ? (
           <div className="h-full grid place-items-center text-muted-foreground">Preparing board...</div>
         ) : (
           <div className={cn(
             filter === "total" 
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 overflow-hidden min-h-0"
-              : "w-full flex flex-col flex-1 overflow-hidden min-h-0"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1 md:overflow-hidden min-h-0"
+              : "w-full flex flex-col flex-1 md:overflow-hidden min-h-0"
           )}>
             {columns.filter((col) => filter === "total" || col.status === filter).map((col) => {
               const columnTickets = filteredTickets.filter((t) => t.status === col.status);
@@ -218,7 +218,7 @@ function Dashboard() {
                 <div 
                   key={col.status} 
                   className={cn(
-                    "rounded-lg border flex flex-col h-full min-h-0 transition-all duration-300 overflow-hidden shadow-inner",
+                    "rounded-lg border flex flex-col md:h-full min-h-[200px] md:min-h-0 transition-all duration-300 overflow-hidden shadow-inner",
                     col.bg,
                     isDisabled ? "opacity-30 scale-[0.98] border-transparent bg-muted/40" : "border-border bg-background/40"
                   )}
@@ -244,7 +244,7 @@ function Dashboard() {
 
                   {/* Column Content */}
                   <div className={cn(
-                    "flex-1 overflow-y-auto p-4 min-h-0 scrollbar-thin transition-all",
+                    "flex-1 md:overflow-y-auto p-4 min-h-0 scrollbar-thin transition-all",
                     filter === "total"
                       ? "space-y-3"
                       : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"

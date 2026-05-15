@@ -95,15 +95,15 @@ function TicketsList() {
 
   return (
     <div className="space-y-6 max-w-6xl">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-3xl font-semibold">Tickets</h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm">
             {isStaff ? "All client tickets" : "Your tickets"}
           </p>
         </div>
         {role === "client" && (
-          <Button asChild>
+          <Button asChild className="w-full sm:w-auto justify-center">
             <Link to="/tickets/new"><Plus className="h-4 w-4 mr-2" /> New Ticket</Link>
           </Button>
         )}
@@ -169,25 +169,25 @@ function TicketsList() {
               className="p-5 cursor-pointer transition-all hover:border-primary/40 hover:shadow-md bg-card"
               onClick={() => navigate({ to: "/tickets/$ticketId", params: { ticketId: t.id } })}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="font-semibold">{t.title}</h3>
+                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    <h3 className="font-semibold text-base tracking-tight">{t.title}</h3>
                     <Badge className={priorityColor[t.priority]} variant="secondary">{t.priority}</Badge>
                     <Badge variant="outline" className="capitalize">
                       {t.type === "enhancement" ? "Enhancement" : (t.type === "improvement" ? "Improvement" : (t.type === "issue" ? "Issue" : t.type))}
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
-                  <div className="text-xs text-muted-foreground mt-2 flex gap-3 flex-wrap">
-                    <span>Website: {websites[t.website_id]?.name ?? "—"}</span>
+                  <div className="text-xs text-muted-foreground mt-3 flex gap-3 flex-wrap font-medium">
+                    <span>🌐 {websites[t.website_id]?.name ?? "—"}</span>
                     {isStaff && (
-                      <span>Client: {profiles[t.client_id]?.full_name || profiles[t.client_id]?.email || "—"}</span>
+                      <span>👤 {profiles[t.client_id]?.full_name || profiles[t.client_id]?.email || "—"}</span>
                     )}
-                    <span>{new Date(t.created_at).toLocaleString()}</span>
+                    <span>📅 {new Date(t.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                <div className="shrink-0 w-full sm:w-auto flex justify-end sm:block pt-2 sm:pt-0 border-t sm:border-t-0 border-dashed" onClick={(e) => e.stopPropagation()}>
                   {canChangeStatus ? (
                     <Select value={t.status} onValueChange={(v) => updateStatus(t.id, v)}>
                       <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
