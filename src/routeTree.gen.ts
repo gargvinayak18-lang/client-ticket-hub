@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedTicketsIndexRouteImport } from './routes/_authenticated/tickets.index'
 import { Route as AuthenticatedTicketsNewRouteImport } from './routes/_authenticated/tickets.new'
+import { Route as AuthenticatedAdminWebsitesRouteImport } from './routes/_authenticated/admin.websites'
 import { Route as AuthenticatedAdminClientsRouteImport } from './routes/_authenticated/admin.clients'
 
 const LoginRoute = LoginRouteImport.update({
@@ -47,6 +48,12 @@ const AuthenticatedTicketsNewRoute = AuthenticatedTicketsNewRouteImport.update({
   path: '/tickets/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminWebsitesRoute =
+  AuthenticatedAdminWebsitesRouteImport.update({
+    id: '/admin/websites',
+    path: '/admin/websites',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminClientsRoute =
   AuthenticatedAdminClientsRouteImport.update({
     id: '/admin/clients',
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
+  '/admin/websites': typeof AuthenticatedAdminWebsitesRoute
   '/tickets/new': typeof AuthenticatedTicketsNewRoute
   '/tickets/': typeof AuthenticatedTicketsIndexRoute
 }
@@ -67,6 +75,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/admin/clients': typeof AuthenticatedAdminClientsRoute
+  '/admin/websites': typeof AuthenticatedAdminWebsitesRoute
   '/tickets/new': typeof AuthenticatedTicketsNewRoute
   '/tickets': typeof AuthenticatedTicketsIndexRoute
 }
@@ -77,6 +86,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/admin/clients': typeof AuthenticatedAdminClientsRoute
+  '/_authenticated/admin/websites': typeof AuthenticatedAdminWebsitesRoute
   '/_authenticated/tickets/new': typeof AuthenticatedTicketsNewRoute
   '/_authenticated/tickets/': typeof AuthenticatedTicketsIndexRoute
 }
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/admin/clients'
+    | '/admin/websites'
     | '/tickets/new'
     | '/tickets/'
   fileRoutesByTo: FileRoutesByTo
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/admin/clients'
+    | '/admin/websites'
     | '/tickets/new'
     | '/tickets'
   id:
@@ -104,6 +116,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/dashboard'
     | '/_authenticated/admin/clients'
+    | '/_authenticated/admin/websites'
     | '/_authenticated/tickets/new'
     | '/_authenticated/tickets/'
   fileRoutesById: FileRoutesById
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTicketsNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/websites': {
+      id: '/_authenticated/admin/websites'
+      path: '/admin/websites'
+      fullPath: '/admin/websites'
+      preLoaderRoute: typeof AuthenticatedAdminWebsitesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/clients': {
       id: '/_authenticated/admin/clients'
       path: '/admin/clients'
@@ -171,6 +191,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedAdminClientsRoute: typeof AuthenticatedAdminClientsRoute
+  AuthenticatedAdminWebsitesRoute: typeof AuthenticatedAdminWebsitesRoute
   AuthenticatedTicketsNewRoute: typeof AuthenticatedTicketsNewRoute
   AuthenticatedTicketsIndexRoute: typeof AuthenticatedTicketsIndexRoute
 }
@@ -178,6 +199,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedAdminClientsRoute: AuthenticatedAdminClientsRoute,
+  AuthenticatedAdminWebsitesRoute: AuthenticatedAdminWebsitesRoute,
   AuthenticatedTicketsNewRoute: AuthenticatedTicketsNewRoute,
   AuthenticatedTicketsIndexRoute: AuthenticatedTicketsIndexRoute,
 }
