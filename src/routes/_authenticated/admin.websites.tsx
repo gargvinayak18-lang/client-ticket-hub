@@ -1,0 +1,126 @@
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useAuth } from "@/hooks/use-auth";
+import { adminAddWebsite, adminListClients, adminListWebsitesForClient } from "@/lib/admin.functions";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
+} from "@/components/ui/dialog";
+import { Plus, Globe } from "lucide-react";
+import { toast } from "sonner";
+
+export const Route = createFileRoute("/_authenticated/admin/websites")({
+  component: WebsitesPage,
+});
+
+function WebsitesPage() {
+  const { role, loading } = useAuth();
+  const list = useServerFn(adminListClients);
+  const listWs = useServerFn(adminListWebsitesForClient);
+  const add = useServerFn(adminAddWebsite);
+  const [clients, setClients] = useState<any[]>([]);
+  const [selected, setSelected] = useState("");
+  const [websites, setWebsites] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", url: "" });
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (role === "admin") list().then(setClients).catch((e) => toast.error(e.message));
+  }, [role]);
+
+  useEffect(() => {
+    if (selected) listWs({ data: { client_id: selected } }).then(setWebsites);
+  }, [selected]);
+
+  if (loading) return null;
+  if (role !== "admin") return <Navigate to="/dashboard" />;
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await add({ data: { client_id: selected, ...form } });
+      toast.success("Website added");
+      setForm({ name: "", url: "" });
+      setOpen(false);
+      const ws = await listWs({ data: { client_id: selected } });
+      setWebsites(ws);
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-5xl">
+      <div>
+        <h1 className="text-3xl font-semibold">Websites</h1>
+        <p className="text-muted-foreground mt-1">Assign websites to clients</p>
+      </div>
+
+      <Card className="p-6 space-y-4">
+        <div className="flex items-end gap-3">
+          <div className="flex-1 space-y-2">
+            <Label>Client</Label>
+            <Select value={selected} onValueChange={setSelected}>
+              <SelectTrigger><SelectValue placeholder="Choose a client" /></SelectTrigger>
+              <SelectContent>
+                {clients.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.full_name} ({c.email})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={!selected}><Plus className="h-4 w-4 mr-2" /> Add Website</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Add Website</DialogTitle></DialogHeader>
+              <form onSubmit={submit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>URL</Label>
+                  <Input type="url" required placeholder="https://example.com" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} />
+                </div>
+                <DialogFooter>
+                  <Button type="submit" disabled={busy}>{busy ? "Adding…" : "Add"}</Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        {selected && (
+          websites.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">No websites for this client yet.</p>
+          ) : (
+            <div className="divide-y border rounded-md">
+              {websites.map((w) => (
+                <div key={w.id} className="p-3 flex items-center gap-3">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium">{w.name}</div>
+                    <div className="text-sm text-muted-foreground truncate">{w.url}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </Card>
+    </div>
+  );
+}
