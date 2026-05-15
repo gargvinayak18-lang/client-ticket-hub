@@ -45,6 +45,7 @@ const ROLE_LABELS: Record<string, string> = {
   sr_dev: "Senior Developer",
   pm: "Product Manager",
   client: "Customer / Client",
+  tester: "Tester",
 };
 
 function TicketDetail() {

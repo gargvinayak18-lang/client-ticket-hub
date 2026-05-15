@@ -204,6 +204,7 @@ function AuthLayout() {
       case "jr_dev": return "Jr. Developer";
       case "sr_dev": return "Sr. Developer";
       case "pm": return "Product Manager";
+      case "tester": return "Tester";
       default: return "User";
     }
   };

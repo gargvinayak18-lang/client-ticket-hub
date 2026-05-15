@@ -66,7 +66,7 @@ export const adminCreateStaff = createServerFn({ method: "POST" })
         email: z.string().email().max(255),
         password: z.string().min(8).max(72),
         full_name: z.string().min(1).max(120),
-        role: z.enum(["jr_dev", "sr_dev", "pm"]),
+        role: z.enum(["jr_dev", "sr_dev", "pm", "tester"]),
       })
       .parse(input),
   )
@@ -100,7 +100,7 @@ export const adminListStaff = createServerFn({ method: "GET" })
     const { data: roles, error } = await supabaseAdmin
       .from("user_roles")
       .select("user_id, role")
-      .in("role", ["jr_dev", "sr_dev", "pm"]);
+      .in("role", ["jr_dev", "sr_dev", "pm", "tester"]);
 
     if (error) throw new Error(error.message);
     if (!roles || roles.length === 0) return [];
@@ -243,4 +243,30 @@ export const adminListAdmins = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
     if (pe) throw new Error(pe.message);
     return profiles ?? [];
+  });
+
+export const adminUpdateUserRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        role: z.enum(["admin", "client", "jr_dev", "sr_dev", "pm", "tester"]),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+
+    if (data.userId === context.userId) {
+      throw new Error("You cannot change your own role.");
+    }
+
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .update({ role: data.role })
+      .eq("user_id", data.userId);
+
+    if (error) throw new Error(error.message);
+    return { success: true };
   });

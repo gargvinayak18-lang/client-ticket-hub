@@ -6,7 +6,8 @@ import {
   adminCreateStaff, 
   adminListStaff, 
   adminDeleteUser, 
-  adminUpdateUserPassword 
+  adminUpdateUserPassword,
+  adminUpdateUserRole 
 } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,14 +38,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { UserPlus, UserRoundCog, MoreVertical, KeyRound, UserMinus } from "lucide-react";
+import { UserPlus, UserRoundCog, MoreVertical, KeyRound, UserMinus, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: StaffManagementPage,
 });
 
-type StaffRole = "jr_dev" | "sr_dev" | "pm";
+type StaffRole = "jr_dev" | "sr_dev" | "pm" | "tester";
 
 function StaffManagementPage() {
   const { role, loading } = useAuth();
@@ -53,6 +54,7 @@ function StaffManagementPage() {
   const create = useServerFn(adminCreateStaff);
   const deleteUser = useServerFn(adminDeleteUser);
   const updatePassword = useServerFn(adminUpdateUserPassword);
+  const updateRole = useServerFn(adminUpdateUserRole);
   
   const [staff, setStaff] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -68,6 +70,12 @@ function StaffManagementPage() {
   // Deletion state
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingUser, setDeletingUser] = useState<any | null>(null);
+
+  // Role change state
+  const [roleOpen, setRoleOpen] = useState(false);
+  const [roleTarget, setRoleTarget] = useState<any | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [updatingRole, setUpdatingRole] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const load = async () => {
@@ -135,6 +143,24 @@ function StaffManagementPage() {
     }
   };
 
+  const handleRoleChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!roleTarget || !selectedRole) return;
+    setUpdatingRole(true);
+    try {
+      await updateRole({ data: { userId: roleTarget.id, role: selectedRole as any } });
+      toast.success(`Role updated to ${selectedRole} for ${roleTarget.full_name}`);
+      setRoleTarget(null);
+      setSelectedRole("");
+      setRoleOpen(false);
+      load();
+    } catch (e: any) {
+      toast.error(e.message);
+    } finally {
+      setUpdatingRole(false);
+    }
+  };
+
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "jr_dev":
@@ -153,6 +179,12 @@ function StaffManagementPage() {
         return (
           <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-400 font-medium">
             Product Manager
+          </Badge>
+        );
+      case "tester":
+        return (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 font-medium">
+            Tester
           </Badge>
         );
       default:
@@ -212,6 +244,7 @@ function StaffManagementPage() {
                     <SelectItem value="jr_dev">Jr. Developer</SelectItem>
                     <SelectItem value="sr_dev">Sr. Developer</SelectItem>
                     <SelectItem value="pm">Product Manager</SelectItem>
+                    <SelectItem value="tester">Tester</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -292,6 +325,50 @@ function StaffManagementPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Role Change Modal */}
+      <Dialog open={roleOpen} onOpenChange={(v) => { if(!v) { setRoleTarget(null); setSelectedRole(""); } setRoleOpen(v); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5 text-primary" /> Change User Role
+            </DialogTitle>
+          </DialogHeader>
+          {roleTarget && (
+            <form onSubmit={handleRoleChange} className="space-y-4 pt-2">
+              <div className="text-sm text-muted-foreground">
+                Reassign role for <strong className="text-foreground">{roleTarget.full_name}</strong> ({roleTarget.email}).
+              </div>
+              <div className="space-y-2">
+                <Label>Current Role</Label>
+                <div>{getRoleBadge(roleTarget.role)}</div>
+              </div>
+              <div className="space-y-2">
+                <Label>New Role</Label>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select new role..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="jr_dev">Jr. Developer</SelectItem>
+                    <SelectItem value="sr_dev">Sr. Developer</SelectItem>
+                    <SelectItem value="pm">Product Manager</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="tester">Tester</SelectItem>
+                    <SelectItem value="client">Client</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setRoleOpen(false)}>Cancel</Button>
+                <Button type="submit" disabled={updatingRole || !selectedRole || selectedRole === roleTarget.role}>
+                  {updatingRole ? "Updating…" : "Update Role"}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {staff.length === 0 ? (
         <Card className="p-12 text-center text-muted-foreground">No staff members found yet.</Card>
       ) : (
@@ -338,6 +415,17 @@ function StaffManagementPage() {
                       >
                         <KeyRound className="h-4 w-4 text-muted-foreground" />
                         Reset Password
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer flex items-center gap-2"
+                        onClick={() => {
+                          setRoleTarget(member);
+                          setSelectedRole(member.role);
+                          setRoleOpen(true);
+                        }}
+                      >
+                        <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                        Change Role
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 

@@ -35,6 +35,7 @@ const ROLE_LABELS: Record<string, string> = {
   sr_dev: "Senior Developer",
   pm: "Product Manager",
   client: "Customer / Client",
+  tester: "Tester",
 };
 
 function WorkflowsConsole() {
@@ -67,7 +68,7 @@ function WorkflowsConsole() {
   // RELATIONAL MAPPING STORE: maps { step_number: reviewer_id }
   const [selectedReviewerIds, setSelectedReviewerIds] = useState<Record<number, string>>({});
 
-  const canManage = role === "admin" || role === "pm" || role === "sr_dev";
+  const canManage = role === "admin" || role === "pm" || role === "sr_dev" || role === "jr_dev";
 
   const loadFlows = async () => {
     setLoading(true);
@@ -150,7 +151,7 @@ function WorkflowsConsole() {
       const { data: revRoles } = await supabase
         .from("user_roles")
         .select("user_id, role")
-        .in("role", ["admin", "pm", "sr_dev", "client"]);
+        .in("role", ["admin", "pm", "sr_dev", "jr_dev", "tester", "client"]);
 
       if (revRoles && revRoles.length > 0) {
         const roleMap = revRoles.reduce((acc, r) => {
@@ -446,8 +447,10 @@ function WorkflowsConsole() {
                             <SelectContent>
                               {targetType === "staff" ? (
                                 <>
+                                  <SelectItem value="jr_dev">Junior Developer</SelectItem>
                                   <SelectItem value="sr_dev">Senior Developer</SelectItem>
                                   <SelectItem value="pm">Product Manager</SelectItem>
+                                  <SelectItem value="tester">Tester</SelectItem>
                                   <SelectItem value="admin">System Admin</SelectItem>
                                 </>
                               ) : (
