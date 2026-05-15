@@ -54,7 +54,7 @@ function TicketsList() {
   useEffect(() => { load(); }, [role]);
 
   const updateStatus = async (id: string, status: string) => {
-    await supabase.from("tickets").update({ status }).eq("id", id);
+    await supabase.from("tickets").update({ status: status as any }).eq("id", id);
     load();
   };
 
