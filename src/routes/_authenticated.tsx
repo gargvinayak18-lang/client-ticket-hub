@@ -231,13 +231,12 @@ function AuthLayout() {
     <div className="min-h-screen bg-secondary/30 flex">
       {/* Sidebar Navigation */}
       <aside className="w-60 bg-primary text-primary-foreground flex flex-col fixed inset-y-0 left-0 z-20 shadow-xl">
-        <div className="px-6 py-5 border-b border-white/10 flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-accent grid place-items-center shadow-inner">
-            <TicketIcon className="h-4 w-4" />
+        <div className="px-6 py-5 border-b border-white/10 flex flex-col gap-3 bg-black/10">
+          <div className="bg-white p-2 rounded-xl shadow-inner w-fit flex items-center justify-center max-h-12">
+            <img src="/logo.png" alt="Nexora Solutions" className="h-6 object-contain" />
           </div>
-          <div>
-            <div className="font-semibold leading-tight">Helpdesk</div>
-            <div className="text-[11px] opacity-70 font-semibold">{getRoleLabel(role)}</div>
+          <div className="px-1">
+            <div className="text-[10px] text-white/70 font-bold tracking-wider uppercase leading-none">{getRoleLabel(role)} Workspace</div>
           </div>
         </div>
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
