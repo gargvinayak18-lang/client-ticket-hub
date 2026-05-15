@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedTicketsIndexRouteImport } from './routes/_authenticated/tickets.index'
+import { Route as AuthenticatedTicketsNewRouteImport } from './routes/_authenticated/tickets.new'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -40,17 +41,24 @@ const AuthenticatedTicketsIndexRoute =
     path: '/tickets/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTicketsNewRoute = AuthenticatedTicketsNewRouteImport.update({
+  id: '/tickets/new',
+  path: '/tickets/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/tickets/new': typeof AuthenticatedTicketsNewRoute
   '/tickets/': typeof AuthenticatedTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/tickets/new': typeof AuthenticatedTicketsNewRoute
   '/tickets': typeof AuthenticatedTicketsIndexRoute
 }
 export interface FileRoutesById {
@@ -59,19 +67,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/tickets/new': typeof AuthenticatedTicketsNewRoute
   '/_authenticated/tickets/': typeof AuthenticatedTicketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/dashboard' | '/tickets/'
+  fullPaths: '/' | '/login' | '/dashboard' | '/tickets/new' | '/tickets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/dashboard' | '/tickets'
+  to: '/' | '/login' | '/dashboard' | '/tickets/new' | '/tickets'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
     | '/_authenticated/dashboard'
+    | '/_authenticated/tickets/new'
     | '/_authenticated/tickets/'
   fileRoutesById: FileRoutesById
 }
@@ -118,16 +128,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTicketsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/tickets/new': {
+      id: '/_authenticated/tickets/new'
+      path: '/tickets/new'
+      fullPath: '/tickets/new'
+      preLoaderRoute: typeof AuthenticatedTicketsNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedTicketsNewRoute: typeof AuthenticatedTicketsNewRoute
   AuthenticatedTicketsIndexRoute: typeof AuthenticatedTicketsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedTicketsNewRoute: AuthenticatedTicketsNewRoute,
   AuthenticatedTicketsIndexRoute: AuthenticatedTicketsIndexRoute,
 }
 
@@ -143,3 +162,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
