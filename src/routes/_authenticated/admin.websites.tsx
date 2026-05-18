@@ -12,14 +12,14 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Globe } from "lucide-react";
+import { Plus, Package } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/websites")({
-  component: WebsitesPage,
+  component: ProductsSolutionsPage,
 });
 
-function WebsitesPage() {
+function ProductsSolutionsPage() {
   const { role, loading } = useAuth();
   const [clients, setClients] = useState<any[]>([]);
   const [selected, setSelected] = useState("");
@@ -52,7 +52,7 @@ function WebsitesPage() {
     setBusy(true);
     try {
       await apiAddWebsite({ client_id: selected, ...form });
-      toast.success("Website added");
+      toast.success("Product / Solution added");
       setForm({ name: "", url: "" });
       setOpen(false);
       const ws = await apiListWebsites(selected);
@@ -67,8 +67,8 @@ function WebsitesPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-3xl font-semibold">Websites</h1>
-        <p className="text-muted-foreground mt-1">Assign websites to clients</p>
+        <h1 className="text-3xl font-semibold">Products / Solutions</h1>
+        <p className="text-muted-foreground mt-1">Assign products & solutions to clients</p>
       </div>
 
       <Card className="p-4 sm:p-6 space-y-4">
@@ -86,17 +86,17 @@ function WebsitesPage() {
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button disabled={!selected} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" /> Add Website</Button>
+              <Button disabled={!selected} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" /> Add Product / Solution</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Add Website</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>Add Product / Solution</DialogTitle></DialogHeader>
               <form onSubmit={submit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
                   <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>URL</Label>
+                  <Label>Product URL / Repository</Label>
                   <Input type="url" required placeholder="https://example.com" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} />
                 </div>
                 <DialogFooter>
@@ -109,12 +109,12 @@ function WebsitesPage() {
 
         {selected && (
           websites.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">No websites for this client yet.</p>
+            <p className="text-sm text-muted-foreground py-6 text-center">No products or solutions assigned to this client yet.</p>
           ) : (
             <div className="divide-y border rounded-md">
               {websites.map((w) => (
                 <div key={w.id} className="p-3 flex items-center gap-3">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <Package className="h-4 w-4 text-muted-foreground" />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium">{w.name}</div>
                     <div className="text-sm text-muted-foreground truncate">{w.url}</div>

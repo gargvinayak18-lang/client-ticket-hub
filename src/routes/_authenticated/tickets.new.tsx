@@ -36,7 +36,7 @@ function NewTicket() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!websiteId) return toast.error("Pick a website");
+    if (!websiteId) return toast.error("Pick a product / solution");
     setBusy(true);
     const { error } = await supabase.from("tickets").insert({
       client_id: user!.id,
@@ -58,14 +58,14 @@ function NewTicket() {
       <Card className="p-6">
         {websites.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            You don't have any websites assigned yet. Please contact your admin.
+            You don't have any products or solutions assigned yet. Please contact your admin.
           </p>
         ) : (
           <form onSubmit={submit} className="space-y-4">
             <div className="space-y-2">
-              <Label>Website</Label>
+              <Label>Product / Solution</Label>
               <Select value={websiteId} onValueChange={setWebsiteId}>
-                <SelectTrigger><SelectValue placeholder="Select a website" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select a product / solution" /></SelectTrigger>
                 <SelectContent>
                   {websites.map((w) => (
                     <SelectItem key={w.id} value={w.id}>{w.name} — {w.url}</SelectItem>

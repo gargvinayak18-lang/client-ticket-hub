@@ -147,7 +147,7 @@ function TicketsList() {
         <div className="relative w-full md:w-72 flex-shrink-0">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search title, client or website..."
+            placeholder="Search title, client or product..."
             className="pl-9 text-xs h-9 rounded-full shadow-none bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:border-primary transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -180,7 +180,7 @@ function TicketsList() {
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>
                   <div className="text-xs text-muted-foreground mt-3 flex gap-3 flex-wrap font-medium">
-                    <span>🌐 {websites[t.website_id]?.name ?? "—"}</span>
+                    <span>📦 {websites[t.website_id]?.name ?? "—"}</span>
                     {isStaff && (
                       <span>👤 {profiles[t.client_id]?.full_name || profiles[t.client_id]?.email || "—"}</span>
                     )}

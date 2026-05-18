@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { 
   TicketIcon, LayoutDashboard, Users, LogOut, Globe, Shield, KeyRound, UserCog, GitPullRequest,
-  Bell, ShieldCheck, ChevronRight, Inbox, Clock, Menu
+  Bell, ShieldCheck, ChevronRight, Inbox, Clock, Menu, Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -195,7 +195,7 @@ function AuthLayout() {
           { to: "/admin/users", label: "Users (Staff)", icon: UserCog },
           { to: "/admin/admins", label: "Admins", icon: Shield },
           { to: "/admin/clients", label: "Clients", icon: Users },
-          { to: "/admin/websites", label: "Websites", icon: Globe },
+          { to: "/admin/websites", label: "Products/Solutions", icon: Package },
         ]
       : []),
   ];

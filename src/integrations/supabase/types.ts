@@ -150,7 +150,7 @@ export type Database = {
           name: string
           target_type: "staff" | "client"
           updated_at: string
-          assigned_role: "jr_dev" | "sr_dev"
+          assigned_role: "jr_dev" | "sr_dev" | "pm" | "admin"
         }
         Insert: {
           created_at?: string
@@ -159,7 +159,7 @@ export type Database = {
           name: string
           target_type: "staff" | "client"
           updated_at?: string
-          assigned_role?: "jr_dev" | "sr_dev"
+          assigned_role?: "jr_dev" | "sr_dev" | "pm" | "admin"
         }
         Update: {
           created_at?: string
@@ -168,7 +168,7 @@ export type Database = {
           name?: string
           target_type?: "staff" | "client"
           updated_at?: string
-          assigned_role?: "jr_dev" | "sr_dev"
+          assigned_role?: "jr_dev" | "sr_dev" | "pm" | "admin"
         }
         Relationships: []
       }

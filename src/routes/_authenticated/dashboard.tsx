@@ -140,7 +140,7 @@ function Dashboard() {
           <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search tasks & websites..."
+              placeholder="Search tasks & products..."
               className="pl-9 h-9 text-xs rounded-full shadow-none border-muted-foreground/20 bg-background/40 focus-visible:ring-1 focus-visible:border-primary transition-all"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -290,7 +290,7 @@ function Dashboard() {
                         <div className="space-y-2 pt-1 border-t border-border/50">
                           <div className="flex items-center justify-between gap-2">
                             <div className="text-[11px] font-medium truncate max-w-[120px] text-muted-foreground">
-                              🌐 {websites[t.website_id]?.name || "Website"}
+                              📦 {websites[t.website_id]?.name || "Product/Solution"}
                             </div>
                             <Badge className={cn("text-[10px] px-1.5 font-semibold", priorityColors[t.priority] || "bg-secondary")}>
                               {t.priority}

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { 
   ArrowLeft, Calendar, User, Globe, AlertTriangle, Info, CheckCircle2, Clock, 
-  GitPullRequest, UserCheck, Zap, ShieldCheck, ChevronRight, MessageSquare, ArrowRightLeft, XCircle, Send, Quote
+  GitPullRequest, UserCheck, Zap, ShieldCheck, ChevronRight, MessageSquare, ArrowRightLeft, XCircle, Send, Quote, RefreshCw, Package
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -89,8 +89,71 @@ function TicketDetail() {
   const [postingMsg, setPostingMsg] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+  // Cancel Dialog State
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [rebuildOpen, setRebuildOpen] = useState(false);
+
+  // Edit Ticket Dialog State
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editWebsiteId, setEditWebsiteId] = useState("");
+  const [editType, setEditType] = useState<"issue" | "improvement" | "enhancement">("issue");
+  const [editPriority, setEditPriority] = useState<"low" | "medium" | "high" | "urgent">("medium");
+  const [clientWebsites, setClientWebsites] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (role === "client") {
+      (async () => {
+        const { data } = await supabase.from("websites").select("id, name, url").order("name");
+        setClientWebsites(data ?? []);
+      })();
+    }
+  }, [role]);
+
+  const handleOpenEdit = () => {
+    if (!ticket) return;
+    setEditTitle(ticket.title);
+    setEditDescription(ticket.description);
+    setEditWebsiteId(ticket.website_id);
+    setEditType(ticket.type);
+    setEditPriority(ticket.priority);
+    setEditOpen(true);
+  };
+
+  const handleUpdateTicket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ticket) return;
+    if (!editTitle.trim() || !editDescription.trim() || !editWebsiteId) {
+      return toast.error("Please fill in all required fields.");
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("tickets")
+        .update({
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          website_id: editWebsiteId,
+          type: editType,
+          priority: editPriority,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", ticket.id);
+
+      if (error) throw error;
+      toast.success("Ticket details successfully updated.");
+      setEditOpen(false);
+      load();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update ticket details.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const isStaff = role && role !== "client";
-  const canManageWorkflows = role === "admin" || role === "pm" || role === "sr_dev";
+  const canManageWorkflows = role === "admin" || role === "pm" || role === "sr_dev" || role === "jr_dev";
   const canChangeStatus = role === "admin" || role === "pm";
 
   const loadComments = async () => {
@@ -276,10 +339,10 @@ function TicketDetail() {
   };
 
   useEffect(() => {
-    if (launchOpen) {
+    if (launchOpen || rebuildOpen) {
       loadLauncherData();
     }
-  }, [launchOpen]);
+  }, [launchOpen, rebuildOpen]);
 
   const handleFlowSelect = async (flowId: string) => {
     setSelectedFlowId(flowId);
@@ -323,6 +386,14 @@ function TicketDetail() {
 
     setSaving(true);
     try {
+      // 0. Clean any existing reviewer mappings for this ticket
+      const { error: deleteErr } = await supabase
+        .from("ticket_step_reviewers")
+        .delete()
+        .eq("ticket_id", ticketId);
+
+      if (deleteErr) throw deleteErr;
+
       // 1. Setup dynamic ticket settings
       const { error } = await supabase
         .from("tickets")
@@ -352,8 +423,22 @@ function TicketDetail() {
 
       if (mapErr) throw mapErr;
 
+      // 3. Write a commentary event noting the pipeline launch/rebuild
+      if (currentUser?.id) {
+        const verb = activeFlow ? "🔄 PIPELINE REBUILT & RESET" : "🚀 PIPELINE INITIALIZED";
+        const flowName = allFlows.find(f => f.id === selectedFlowId)?.name || "Workflow";
+        const devName = eligibleDevs.find(d => d.id === selectedStaffId)?.full_name || eligibleDevs.find(d => d.id === selectedStaffId)?.email || selectedStaffId;
+        
+        await supabase.from("ticket_comments").insert({
+          ticket_id: ticketId,
+          user_id: currentUser.id,
+          content: `⚡ **${verb}**\n\nThe validation pipeline has been set to **${flowName}** (starting at Stage 1).\n\nAssigned Developer: **${devName}**`
+        });
+      }
+
       toast.success("Sequencing initiated! Stage-specific reviewers locked.");
       setLaunchOpen(false);
+      setRebuildOpen(false);
       setSelectedFlowId("");
       setSelectedStaffId("");
       setSelectedReviewerIds({});
@@ -534,6 +619,42 @@ function TicketDetail() {
     }
   };
 
+  const handleCancelTicket = async () => {
+    if (!ticket) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("tickets")
+        .update({ 
+          status: "closed", 
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", ticket.id);
+
+      if (error) throw error;
+      
+      try {
+        if (currentUser?.id) {
+          await supabase.from("ticket_comments").insert({
+            ticket_id: ticketId,
+            user_id: currentUser.id,
+            content: "❌ **TICKET CANCELLED BY CLIENT**\n\nThe client has cancelled this ticket."
+          });
+        }
+      } catch (commentErr) {
+        console.warn("Could not insert cancellation comment:", commentErr);
+      }
+
+      toast.success("Ticket successfully cancelled.");
+      setCancelDialogOpen(false);
+      load();
+    } catch (err: any) {
+      toast.error("Cancellation failure.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handlePostMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!msgText.trim() || !currentUser?.id) return;
@@ -629,6 +750,97 @@ function TicketDetail() {
                 )}
               >
                 {saving ? "Publishing..." : "Publish Review & Discard Step"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT TICKET DETAILS DIALOG */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-[500px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-black tracking-tight text-xl text-primary">
+              <Package className="h-6 w-6 animate-bounce" /> Edit Ticket Details
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateTicket} className="space-y-4 py-3 max-h-[85vh] overflow-y-auto pr-1">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Title</Label>
+              <Input
+                required
+                maxLength={200}
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Brief summary of the request..."
+                className="rounded-xl bg-background border-muted-foreground/25 focus-visible:ring-primary text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Type</Label>
+                <Select value={editType} onValueChange={(v) => setEditType(v as any)}>
+                  <SelectTrigger className="rounded-xl bg-background border-muted-foreground/25 text-xs font-bold shadow-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="issue">Issue / Bug</SelectItem>
+                    <SelectItem value="enhancement">Enhancement / New Feature</SelectItem>
+                    <SelectItem value="improvement">Improvement / Design Changes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Priority</Label>
+                <Select value={editPriority} onValueChange={(v) => setEditPriority(v as any)}>
+                  <SelectTrigger className="rounded-xl bg-background border-muted-foreground/25 text-xs font-bold shadow-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Product / Solution</Label>
+              <Select value={editWebsiteId} onValueChange={setEditWebsiteId}>
+                <SelectTrigger className="rounded-xl bg-background border-muted-foreground/25 text-xs font-bold shadow-sm">
+                  <SelectValue placeholder="Select product / solution" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientWebsites.map((w) => (
+                    <SelectItem key={w.id} value={w.id}>{w.name} — {w.url}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Description</Label>
+              <Textarea
+                required
+                rows={5}
+                maxLength={5000}
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Describe your request in detail..."
+                className="bg-background rounded-xl text-xs leading-relaxed border-muted-foreground/25 focus-visible:ring-primary"
+              />
+            </div>
+
+            <DialogFooter className="pt-2 border-t border-dashed flex gap-2">
+              <Button type="button" variant="ghost" onClick={() => setEditOpen(false)} className="rounded-xl font-bold text-xs">
+                Cancel
+              </Button>
+              <Button type="submit" disabled={saving} className="font-bold bg-primary hover:bg-primary/95 rounded-xl shadow-md text-xs">
+                {saving ? "Saving Changes..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>
@@ -789,7 +1001,7 @@ function TicketDetail() {
                         {activeFlow.name}
                       </h3>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <div className="flex items-center gap-1.5 bg-background px-2.5 py-1 rounded-full border text-[10px] font-black shrink-0 shadow-sm">
                         <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
                         <span>DEV: {assignedStaff?.full_name?.split(" ")[0] || assignedStaff?.email?.split("@")[0]}</span>
@@ -799,6 +1011,111 @@ function TicketDetail() {
                           <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
                           <span>ACTIVE REV: {assignedReviewer.full_name?.split(" ")[0] || assignedReviewer.email?.split("@")[0]}</span>
                         </div>
+                      )}
+
+                      {canManageWorkflows && ticket.status === "in_progress" && (
+                        <Dialog open={rebuildOpen} onOpenChange={setRebuildOpen}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="h-7 text-[10px] font-bold rounded-lg border-dashed hover:bg-primary/5 hover:text-primary shrink-0 shadow-sm">
+                              <RefreshCw className="h-3 w-3 mr-1" /> Rebuild Pipeline
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[520px] rounded-2xl">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2 font-black tracking-tight text-xl">
+                                <GitPullRequest className="h-6 w-6 text-primary" /> 
+                                Rebuild Pipeline Configuration
+                              </DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-5 py-3 max-h-[80vh] overflow-y-auto pr-1 scrollbar-thin">
+                              
+                              <div className="space-y-2">
+                                <Label className="font-black text-sm tracking-tight">Step A: Workflow Template</Label>
+                                <Select value={selectedFlowId} onValueChange={handleFlowSelect}>
+                                  <SelectTrigger className="rounded-xl shadow-sm">
+                                    <SelectValue placeholder="Filter templates" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {allFlows.map(f => (
+                                      <SelectItem key={f.id} value={f.id}>
+                                        {f.name} ({ROLE_LABELS[f.assigned_role]} task)
+                                      </SelectItem>
+                                    ))}
+                                    {allFlows.length === 0 && <SelectItem value="none" disabled>No active workflows</SelectItem>}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {selectedFlowId && (
+                                <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200 border-t pt-3">
+                                  <Label className="font-black text-sm tracking-tight">Step B: Specific Developer Assignment</Label>
+                                  <Select value={selectedStaffId} onValueChange={setSelectedStaffId}>
+                                    <SelectTrigger className="rounded-xl shadow-sm">
+                                      <SelectValue placeholder="Assign developer" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {eligibleDevs.map(u => (
+                                        <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
+                                      ))}
+                                      {eligibleDevs.length === 0 && <SelectItem value="none" disabled>No available matches</SelectItem>}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              )}
+
+                              {/* MULTI-STAGE REVIEWER SELECTION GRID */}
+                              {selectedFlowId && selectedFlowSteps.length > 0 && (
+                                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300 border-t pt-3">
+                                  <Label className="font-black text-sm tracking-tight text-primary">
+                                    Step C: Designated Stage Reviewers
+                                  </Label>
+                                  <p className="text-[11px] text-muted-foreground font-medium">
+                                    Map a specific supervisor for EACH sequential validation step:
+                                  </p>
+                                  <div className="space-y-2.5">
+                                    {selectedFlowSteps.map(step => {
+                                      const matchingOptions = eligibleReviewers.filter(u => u.roles?.includes(step.approver_role));
+
+                                      return (
+                                        <div key={step.id} className="space-y-1.5 p-2.5 bg-muted/20 border rounded-xl shadow-sm">
+                                          <div className="flex items-center justify-between text-[10px] font-black uppercase text-muted-foreground px-1">
+                                            <span>Stage {step.step_number}: {step.name}</span>
+                                            <span className="bg-background border px-1.5 py-0.5 rounded-md">{ROLE_LABELS[step.approver_role]}</span>
+                                          </div>
+                                          <Select 
+                                            value={selectedReviewerIds[step.step_number] || ""} 
+                                            onValueChange={(v) => setSelectedReviewerIds(prev => ({ ...prev, [step.step_number]: v }))}
+                                          >
+                                            <SelectTrigger className="rounded-xl h-9 bg-background text-xs font-bold shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
+                                              <SelectValue placeholder={`Assign ${ROLE_LABELS[step.approver_role]}...`} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              {matchingOptions.map(u => (
+                                                <SelectItem key={u.id} value={u.id}>{u.full_name || u.email}</SelectItem>
+                                              ))}
+                                              {matchingOptions.length === 0 && (
+                                                <SelectItem value="none" disabled>No matching staff</SelectItem>
+                                              )}
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <DialogFooter className="pt-2 border-t border-dashed">
+                              <Button 
+                                onClick={handleLaunchWorkflow} 
+                                disabled={saving || !selectedFlowId || !selectedStaffId || Object.keys(selectedReviewerIds).length < selectedFlowSteps.length}
+                                className="w-full sm:w-auto font-black shadow-lg rounded-xl px-6"
+                              >
+                                {saving ? "Securing Registry..." : "⚡ Rebuild & Reset"}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       )}
                     </div>
                   </div>
@@ -1072,6 +1389,63 @@ function TicketDetail() {
                 </div>
               )}
             </div>
+
+            {role === "client" && ticket.client_id === currentUser?.id && ticket.status === "open" && (
+              <div className="pt-2 border-t border-dashed mt-2 flex flex-col gap-2">
+                <Button 
+                  onClick={handleOpenEdit}
+                  className="w-full font-bold text-xs rounded-xl shadow-md h-9 bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-1.5"
+                  disabled={saving}
+                >
+                  <RefreshCw className="h-4 w-4" /> Edit Details
+                </Button>
+
+                <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full font-bold text-xs rounded-xl shadow-md h-9 bg-red-600 hover:bg-red-700 text-white"
+                      disabled={saving}
+                    >
+                      <XCircle className="h-4 w-4 mr-1.5" /> Cancel Ticket
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[420px] rounded-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2 font-black tracking-tight text-xl text-destructive">
+                        <AlertTriangle className="h-6 w-6 text-destructive" />
+                        Cancel Ticket
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="py-3 space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                        Are you sure you want to cancel this ticket? Cancelling it will close the ticket and halt any further processing.
+                      </p>
+                      <p className="text-xs font-semibold text-muted-foreground/80">
+                        This action cannot be undone once confirmed.
+                      </p>
+                    </div>
+                    <DialogFooter className="pt-2 border-t border-dashed flex gap-2 sm:gap-0">
+                      <Button 
+                        variant="ghost" 
+                        onClick={() => setCancelDialogOpen(false)}
+                        className="rounded-xl font-bold text-xs"
+                      >
+                        No, Keep Open
+                      </Button>
+                      <Button 
+                        variant="destructive"
+                        onClick={handleCancelTicket}
+                        disabled={saving}
+                        className="rounded-xl font-bold text-xs shadow-md bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        {saving ? "Cancelling..." : "Yes, Cancel Ticket"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
           </Card>
 
           <Card className="p-5 space-y-5 shadow-sm rounded-2xl">
@@ -1089,9 +1463,9 @@ function TicketDetail() {
               </div>
 
               <div className="flex gap-3 items-start border-t pt-3">
-                <Globe className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0 opacity-70" />
+                <Package className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0 opacity-70" />
                 <div className="min-w-0 flex-1">
-                  <div className="font-black text-[9px] tracking-widest uppercase text-muted-foreground mb-0.5">Environment</div>
+                  <div className="font-black text-[9px] tracking-widest uppercase text-muted-foreground mb-0.5">Product / Solution</div>
                   {website ? (
                     <div className="space-y-0.5 truncate">
                       <div className="text-primary font-black truncate leading-tight">{website.name}</div>

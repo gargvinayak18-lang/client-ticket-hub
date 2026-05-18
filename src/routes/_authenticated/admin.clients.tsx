@@ -217,7 +217,7 @@ function ClientsPage() {
             <AlertDialogTitle>Delete client account?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently remove client <strong className="text-foreground">{deletingUser?.full_name}</strong>. 
-              All associated websites and support tickets for this client will also be permanently deleted. This action cannot be undone.
+              All associated products/solutions and support tickets for this client will also be permanently deleted. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

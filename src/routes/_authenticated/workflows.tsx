@@ -51,7 +51,7 @@ function WorkflowsConsole() {
   const [flowName, setFlowName] = useState("");
   const [flowDesc, setFlowDesc] = useState("");
   const [targetType, setTargetType] = useState<"staff" | "client">("staff");
-  const [assignedRole, setAssignedRole] = useState<"jr_dev" | "sr_dev">("jr_dev");
+  const [assignedRole, setAssignedRole] = useState<"jr_dev" | "sr_dev" | "pm" | "admin">("jr_dev");
   const [steps, setSteps] = useState<LocalStep[]>([
     { name: "Senior Validation", approver_role: "sr_dev" }
   ]);
@@ -400,6 +400,8 @@ function WorkflowsConsole() {
                         <SelectContent>
                           <SelectItem value="jr_dev">Junior Developer Pool</SelectItem>
                           <SelectItem value="sr_dev">Senior Developer Pool</SelectItem>
+                          <SelectItem value="pm">Product Manager Pool</SelectItem>
+                          <SelectItem value="admin">System Admin Pool</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
