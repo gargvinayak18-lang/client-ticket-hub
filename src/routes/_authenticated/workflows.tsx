@@ -319,7 +319,7 @@ function WorkflowsConsole() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight flex items-center gap-2 text-foreground">
+          <h1 className="text-3xl font-semibold tracking-tight flex items-center gap-2 text-foreground">
             <GitPullRequest className="h-7 w-7 text-primary" /> Process Architect
           </h1>
           <p className="text-sm text-muted-foreground font-medium">
@@ -330,13 +330,13 @@ function WorkflowsConsole() {
         {canManage && (
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
-              <Button className="shadow-lg font-bold rounded-xl bg-primary hover:bg-primary/90">
+              <Button className="shadow-lg font-semibold rounded-xl bg-primary hover:bg-primary/90">
                 <Plus className="h-4 w-4 mr-1" /> Construct Flow
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px] rounded-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 font-black tracking-tight text-xl">
+                <DialogTitle className="flex items-center gap-2 font-semibold tracking-tight text-xl">
                   <GitPullRequest className="h-6 w-6 text-primary" />
                   Build Custom Sequence
                 </DialogTitle>
@@ -345,7 +345,7 @@ function WorkflowsConsole() {
                 <div className="space-y-4 border-b pb-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="font-black text-xs uppercase tracking-widest opacity-80">1. Design Identity</Label>
+                      <Label className="font-semibold text-xs uppercase tracking-widest opacity-80">1. Design Identity</Label>
                       <Input 
                         placeholder="e.g. Standard Escalation" 
                         required
@@ -355,7 +355,7 @@ function WorkflowsConsole() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="font-black text-xs uppercase tracking-widest opacity-80">2. Lifecycle Classification</Label>
+                      <Label className="font-semibold text-xs uppercase tracking-widest opacity-80">2. Lifecycle Classification</Label>
                       <Select 
                         value={targetType} 
                         onValueChange={(v: any) => {
@@ -375,7 +375,7 @@ function WorkflowsConsole() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="font-black text-xs uppercase tracking-widest opacity-80">Operational Goals (Optional)</Label>
+                    <Label className="font-semibold text-xs uppercase tracking-widest opacity-80">Operational Goals (Optional)</Label>
                     <Textarea 
                       placeholder="Outline parameters..."
                       rows={2}
@@ -387,7 +387,7 @@ function WorkflowsConsole() {
 
                   {targetType === "staff" && (
                     <div className="p-4 bg-primary/[0.03] border rounded-xl space-y-2 animate-in fade-in duration-300">
-                      <Label className="font-black text-xs uppercase tracking-widest opacity-80 flex items-center gap-1.5 text-primary">
+                      <Label className="font-semibold text-xs uppercase tracking-widest opacity-80 flex items-center gap-1.5 text-primary">
                         <Hammer className="h-3.5 w-3.5" /> 3. Task Assignment Level
                       </Label>
                       <p className="text-[11px] text-muted-foreground leading-relaxed font-medium pb-1">
@@ -410,7 +410,7 @@ function WorkflowsConsole() {
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="font-black text-xs uppercase tracking-widest opacity-80 flex items-center gap-1.5">
+                    <Label className="font-semibold text-xs uppercase tracking-widest opacity-80 flex items-center gap-1.5">
                       <Shield className="h-3.5 w-3.5" /> 4. Sequential Validation Map
                     </Label>
                     <Button 
@@ -418,7 +418,7 @@ function WorkflowsConsole() {
                       variant="outline" 
                       size="sm" 
                       onClick={handleAddStep}
-                      className="h-7 text-xs font-bold border-dashed hover:bg-accent rounded-lg"
+                      className="h-7 text-xs font-semibold border-dashed hover:bg-accent rounded-lg"
                     >
                       <Plus className="h-3 w-3 mr-1" /> Step
                     </Button>
@@ -427,7 +427,7 @@ function WorkflowsConsole() {
                   <div className="space-y-3 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin">
                     {steps.map((st, idx) => (
                       <div key={idx} className="flex items-center gap-2.5 bg-muted/20 border p-2.5 rounded-xl animate-in zoom-in-95">
-                        <div className="h-6 w-6 rounded-full bg-background border flex items-center justify-center text-xs font-black text-muted-foreground shrink-0">
+                        <div className="h-6 w-6 rounded-full bg-background border flex items-center justify-center text-xs font-semibold text-muted-foreground shrink-0">
                           {idx + 1}
                         </div>
                         
@@ -482,7 +482,7 @@ function WorkflowsConsole() {
                 </div>
 
                 <DialogFooter className="pt-2">
-                  <Button type="submit" disabled={busy} className="w-full sm:w-auto font-black rounded-xl px-6">
+                  <Button type="submit" disabled={busy} className="w-full sm:w-auto font-semibold rounded-xl px-6">
                     {busy ? "Finalizing Schema..." : "Publish Process Template"}
                   </Button>
                 </DialogFooter>
@@ -497,18 +497,18 @@ function WorkflowsConsole() {
         <Dialog open={deployOpen} onOpenChange={setDeployOpen}>
           <DialogContent className="sm:max-w-[500px] rounded-2xl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 font-black tracking-tight text-xl">
+              <DialogTitle className="flex items-center gap-2 font-semibold tracking-tight text-xl">
                 <Zap className="h-6 w-6 text-primary fill-current animate-pulse" />
                 Deploy Workflow Engine
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleDeploySubmit} className="space-y-5 py-3 max-h-[80vh] overflow-y-auto pr-1 scrollbar-thin">
               <div className="p-3 rounded-xl bg-primary/[0.02] border border-primary/10 text-xs font-semibold">
-                Selected Template: <span className="font-black text-primary">{activeDeployFlow.name}</span>
+                Selected Template: <span className="font-semibold text-primary">{activeDeployFlow.name}</span>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="font-black text-xs uppercase tracking-widest opacity-80 flex items-center gap-1">
+                <Label className="font-semibold text-xs uppercase tracking-widest opacity-80 flex items-center gap-1">
                   1. Select Target Ticket
                 </Label>
                 <Select value={selectedTicketId} onValueChange={setSelectedTicketId}>
@@ -529,7 +529,7 @@ function WorkflowsConsole() {
               {selectedTicketId && (
                 <div className="space-y-5 animate-in fade-in duration-300">
                   <div className="space-y-1.5 border-t pt-3">
-                    <Label className="font-black text-xs uppercase tracking-widest opacity-80">
+                    <Label className="font-semibold text-xs uppercase tracking-widest opacity-80">
                       2. Designated Execution Dev
                     </Label>
                     <p className="text-[10px] text-muted-foreground pb-0.5 font-medium">
@@ -550,7 +550,7 @@ function WorkflowsConsole() {
 
                   {/* MULTI-STAGE STAGE REVIEWER ASSIGNMENTS */}
                   <div className="space-y-3 border-t pt-3">
-                    <Label className="font-black text-xs uppercase tracking-widest text-primary flex items-center gap-1.5">
+                    <Label className="font-semibold text-xs uppercase tracking-widest text-primary flex items-center gap-1.5">
                       <ShieldCheck className="h-3.5 w-3.5" /> 3. Designated Stage Reviewers
                     </Label>
                     <p className="text-[10px] text-muted-foreground pb-1 font-medium">
@@ -563,7 +563,7 @@ function WorkflowsConsole() {
 
                         return (
                           <div key={step.id} className="space-y-1.5 p-2.5 bg-muted/20 border rounded-xl shadow-sm animate-in slide-in-from-top-1">
-                            <div className="flex justify-between items-center text-[10px] font-black uppercase text-muted-foreground px-1">
+                            <div className="flex justify-between items-center text-[10px] font-semibold uppercase text-muted-foreground px-1">
                               <span>Stage {step.step_number}: {step.name}</span>
                               <span className="bg-background border px-1.5 py-0.5 rounded-md tracking-normal">{ROLE_LABELS[step.approver_role]}</span>
                             </div>
@@ -595,7 +595,7 @@ function WorkflowsConsole() {
                 <Button 
                   type="submit" 
                   disabled={busy || !selectedTicketId || !selectedDevId || Object.keys(selectedReviewerIds).length < (activeDeployFlow.steps?.length || 0)} 
-                  className="w-full sm:w-auto font-black shadow-md rounded-xl"
+                  className="w-full sm:w-auto font-semibold shadow-md rounded-xl"
                 >
                   {busy ? "Linking Database..." : "⚡ Initialize & Dispatch"}
                 </Button>
@@ -606,11 +606,11 @@ function WorkflowsConsole() {
       )}
 
       {loading ? (
-        <div className="text-center text-muted-foreground py-12 font-bold text-xs tracking-wider">AUDITING SEQUENCES...</div>
+        <div className="text-center text-muted-foreground py-12 font-medium text-xs tracking-wider">AUDITING SEQUENCES...</div>
       ) : flows.length === 0 ? (
         <Card className="p-12 text-center flex flex-col items-center justify-center bg-card border rounded-2xl shadow-sm">
           <ClipboardCheck className="h-12 w-12 text-muted-foreground/40 mb-3" />
-          <h3 className="text-lg font-black mb-1 tracking-tight">Empty Framework</h3>
+          <h3 className="text-lg font-semibold mb-1 tracking-tight">Empty Framework</h3>
           <p className="text-xs text-muted-foreground max-w-sm font-medium leading-relaxed">
             {canManage 
               ? "Construct templates above to standardize task executions and sequential peer-reviews." 
@@ -625,8 +625,8 @@ function WorkflowsConsole() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-1.5 border-b border-primary/15">
                 <Shield className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-black tracking-tight">Developer Standard Operating Procedures</h2>
-                <Badge variant="secondary" className="ml-1 rounded-md font-bold">{staffFlows.length}</Badge>
+                <h2 className="text-lg font-semibold tracking-tight">Developer Standard Operating Procedures</h2>
+                <Badge variant="secondary" className="ml-1 rounded-md font-semibold">{staffFlows.length}</Badge>
               </div>
               <div className="grid grid-cols-1 gap-6">
                 {staffFlows.map(f => (
@@ -647,8 +647,8 @@ function WorkflowsConsole() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-1.5 border-b border-emerald-500/15">
                 <Users className="h-5 w-5 text-emerald-600" />
-                <h2 className="text-lg font-black tracking-tight">Customer Validation Lifecycles</h2>
-                <Badge className="ml-1 rounded-md bg-emerald-100 text-emerald-800 hover:bg-emerald-100/80 border-emerald-200 font-bold">{clientFlows.length}</Badge>
+                <h2 className="text-lg font-semibold tracking-tight">Customer Validation Lifecycles</h2>
+                <Badge className="ml-1 rounded-md bg-emerald-100 text-emerald-800 hover:bg-emerald-100/80 border-emerald-200 font-semibold">{clientFlows.length}</Badge>
               </div>
               <div className="grid grid-cols-1 gap-6">
                 {clientFlows.map(f => (
@@ -685,9 +685,9 @@ function FlowCard({
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="space-y-2 max-w-xl flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-lg font-black tracking-tight text-foreground">{flow.name}</h3>
+            <h3 className="text-lg font-semibold tracking-tight text-foreground">{flow.name}</h3>
             {flow.target_type === "staff" && (
-              <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/[0.03] text-primary font-black uppercase tracking-wide">
+              <Badge variant="outline" className="text-[10px] border-primary/20 bg-primary/[0.03] text-primary font-semibold uppercase tracking-wide">
                 🧑‍💻 Target Tier: {ROLE_LABELS[flow.assigned_role] || flow.assigned_role}
               </Badge>
             )}
@@ -695,7 +695,7 @@ function FlowCard({
           {flow.description && (
             <p className="text-xs text-muted-foreground leading-relaxed font-medium">{flow.description}</p>
           )}
-          <div className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-widest">
+          <div className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">
             Established {new Date(flow.created_at).toLocaleDateString()}
           </div>
         </div>
@@ -705,7 +705,7 @@ function FlowCard({
             <Button 
               size="sm" 
               onClick={() => onDeploy(flow)}
-              className="bg-primary hover:bg-primary/90 font-bold text-[11px] px-3.5 h-8 shadow rounded-xl"
+              className="bg-primary hover:bg-primary/90 font-semibold text-[11px] px-3.5 h-8 shadow rounded-xl"
             >
               <Zap className="h-3.5 w-3.5 mr-1 fill-current animate-pulse" /> Run on Ticket
             </Button>
@@ -731,14 +731,14 @@ function FlowCard({
             return (
               <div key={step.id} className="flex items-center gap-2 shrink-0">
                 <div className="flex flex-col items-start border border-border bg-muted/[0.15] px-3.5 py-2.5 rounded-xl shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] min-w-[165px]">
-                  <div className="text-[9px] uppercase tracking-widest font-black text-muted-foreground/80 flex items-center gap-1 mb-1">
-                    <div className="h-3.5 w-3.5 rounded-full bg-background border flex items-center justify-center text-[8px] font-black">
+                  <div className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground/80 flex items-center gap-1 mb-1">
+                    <div className="h-3.5 w-3.5 rounded-full bg-background border flex items-center justify-center text-[8px] font-semibold">
                       {step.step_number}
                     </div>
                     Stage
                   </div>
-                  <div className="text-xs font-black truncate max-w-[175px] leading-tight text-foreground mb-1.5">{step.name}</div>
-                  <div className="inline-flex items-center text-[9px] font-black tracking-wide uppercase bg-background text-foreground border rounded-lg px-2 py-0.5 shadow-sm">
+                  <div className="text-xs font-semibold truncate max-w-[175px] leading-tight text-foreground mb-1.5">{step.name}</div>
+                  <div className="inline-flex items-center text-[9px] font-semibold tracking-wide uppercase bg-background text-foreground border rounded-lg px-2 py-0.5 shadow-sm">
                     🛡️ {ROLE_LABELS[step.approver_role] || step.approver_role}
                   </div>
                 </div>

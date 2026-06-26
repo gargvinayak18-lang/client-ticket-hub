@@ -141,4 +141,11 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  /* Global override to enforce normal font weight on all elements and pages */
+  h1, h2, h3, h4, h5, h6, strong, b,
+  .font-semibold, .font-bold, .font-black, .font-extrabold, .font-medium,
+  [class*="font-semibold"], [class*="font-bold"], [class*="font-black"], [class*="font-extrabold"], [class*="font-medium"] {
+    font-weight: 400 !important;
+  }
 }

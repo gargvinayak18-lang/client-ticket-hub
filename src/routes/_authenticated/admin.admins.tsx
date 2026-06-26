@@ -32,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ShieldPlus, UserRound, MoreVertical, KeyRound, UserMinus } from "lucide-react";
+import { ShieldPlus, User, MoreVertical, KeyRound, UserMinus } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/admins")({
@@ -248,8 +248,8 @@ function AdminsPage() {
             return (
               <div key={admin.id} className="p-5 flex items-center justify-between hover:bg-muted/10 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 text-accent flex items-center justify-center border flex-shrink-0">
-                    <UserRound className="h-5 w-5" />
+                  <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center border flex-shrink-0">
+                    <User className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="font-medium flex items-center gap-2 flex-wrap">
