@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { TicketIcon } from "lucide-react";
 import { toast } from "sonner";
+import { Logo } from "@/components/logo";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -38,11 +39,11 @@ function LoginPage() {
     <div className="min-h-screen grid place-items-center bg-gradient-to-br from-background via-secondary to-background p-4">
       <Card className="w-full max-w-md p-8 shadow-xl">
         <div className="flex flex-col items-center mb-6">
-          <div className="bg-white p-3.5 rounded-2xl border shadow-sm flex items-center justify-center mb-4 max-h-20 max-w-[220px]">
-            <img src="/logo.png" alt="Nexora Solutions" className="h-10 object-contain" />
+          <div className="flex items-center justify-center mb-5">
+            <Logo className="h-10 w-auto" />
           </div>
-          <h1 className="text-2xl font-black tracking-tight">Product & Solutions Hub</h1>
-          <p className="text-xs text-muted-foreground mt-1 font-medium">Sign in to your corporate workspace console</p>
+          <h1 className="text-2xl font-black tracking-tight">Workspace Login</h1>
+          <p className="text-xs text-muted-foreground mt-1 font-medium">Sign in to your SupportDesk workspace console</p>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div className="space-y-2">

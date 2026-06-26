@@ -1,0 +1,6 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Ring in slate-gray -->
+  <path d="M 16 26 A 10 10 0 1 1 6 16" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+  <!-- Inner Wedge in brand pink -->
+  <path d="M 16 16 L 6 16 A 10 10 0 0 0 16 26 Z" fill="#D6336C" />
+</svg>

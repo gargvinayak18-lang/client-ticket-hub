@@ -1,0 +1,15 @@
+<svg width="180" height="40" viewBox="0 0 180 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon -->
+  <g transform="translate(6, 6)">
+    <!-- Outer Ring -->
+    <path d="M 14 22 A 8 8 0 1 1 6 14" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+    <!-- Pink Wedge -->
+    <path d="M 14 14 L 6 14 A 8 8 0 0 0 14 22 Z" fill="#D6336C" />
+  </g>
+  <!-- Text -->
+  <text x="44" y="27" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="20" letter-spacing="-0.5">
+    <tspan fill="#D6336C">Support</tspan>
+    <tspan fill="#FFFFFF">Desk</tspan>
+    <tspan fill="#D6336C">.</tspan>
+  </text>
+</svg>

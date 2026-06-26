@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Logo } from "@/components/logo";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
@@ -235,13 +236,13 @@ function AuthLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const renderSidebarContent = (onNavClick?: () => void) => (
-    <div className="flex flex-col h-full bg-primary text-primary-foreground">
-      <div className="px-6 py-5 border-b border-white/10 flex flex-col gap-3 bg-black/10">
-        <div className="bg-white p-2 rounded-xl shadow-inner w-fit flex items-center justify-center max-h-12">
-          <img src="/logo.png" alt="Nexora Solutions" className="h-6 object-contain" />
+    <div className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
+      <div className="px-6 py-5 border-b border-sidebar-border flex flex-col gap-3 bg-sidebar-accent/10">
+        <div className="flex items-center justify-start py-0.5">
+          <Logo className="h-6 w-auto" />
         </div>
         <div className="px-1">
-          <div className="text-[10px] text-white/70 font-bold tracking-wider uppercase leading-none">{getRoleLabel(role)} Workspace</div>
+          <div className="text-[10px] text-sidebar-foreground/60 font-bold tracking-wider uppercase leading-none">{getRoleLabel(role)} Workspace</div>
         </div>
       </div>
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -254,7 +255,7 @@ function AuthLayout() {
               onClick={onNavClick}
               className={cn(
                 "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all",
-                active ? "bg-white/15 text-white shadow-sm" : "text-white/65 hover:bg-white/10 hover:text-white",
+                active ? "bg-primary text-primary-foreground shadow-sm" : "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-foreground",
               )}
             >
               <n.icon className="h-4 w-4" />
@@ -264,7 +265,7 @@ function AuthLayout() {
         })}
       </nav>
       
-      <div className="p-3 border-t border-white/10 space-y-1">
+      <div className="p-3 border-t border-sidebar-border space-y-1">
         <div className="text-[11px] opacity-60 px-3 pb-2 truncate font-medium">{user?.email}</div>
         
         <Dialog open={pwdOpen} onOpenChange={(v) => { if(!v) setNewPassword(""); setPwdOpen(v); }}>
@@ -272,7 +273,7 @@ function AuthLayout() {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10 font-medium text-xs"
+              className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent font-medium text-xs"
             >
               <KeyRound className="h-3.5 w-3.5 mr-2 opacity-80" />
               Change Password
@@ -308,7 +309,7 @@ function AuthLayout() {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10 font-medium text-xs"
+          className="w-full justify-start text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent font-medium text-xs"
           onClick={async () => {
             await signOut();
             if (onNavClick) onNavClick();
@@ -325,7 +326,7 @@ function AuthLayout() {
   return (
     <div className="min-h-screen bg-secondary/30 flex">
       {/* Sidebar Navigation - Desktop Only */}
-      <aside className="w-60 bg-primary text-primary-foreground flex flex-col fixed inset-y-0 left-0 z-20 shadow-xl hidden md:flex">
+      <aside className="w-60 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col fixed inset-y-0 left-0 z-20 shadow-md hidden md:flex">
         {renderSidebarContent()}
       </aside>
 
@@ -343,7 +344,7 @@ function AuthLayout() {
                     <Menu className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-60 bg-primary text-primary-foreground border-r-0">
+                <SheetContent side="left" className="p-0 w-60 bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
                   {renderSidebarContent(() => setMobileMenuOpen(false))}
                 </SheetContent>
               </Sheet>
